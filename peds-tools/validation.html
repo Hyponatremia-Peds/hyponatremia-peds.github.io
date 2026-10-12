@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validation</title>
+<meta name="description" content="Clinician reference: levels of validation, validation statements and probing questions, with a random-line picker.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0D0D0C">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="shared.js?v=2"></script>
+<script src="pets.js?v=5" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="fonts/karmina.css?v=2" rel="stylesheet">
+<style>
+  /* Same tokens as the hub and the other tools. */
+  :root {
+    --page: #F4F4F5; --panel: #FFFFFF; --soft: #FAFAFA;
+    --brand: #232323; --brand-text: #FFFFFF;
+    --band: #232323; --band-text: #FFFFFF; --band-muted: #A1A1AA;
+    --heading: #18181B; --body: #52525B; --border: #E4E4E7; --subtle: #F2F2F2;
+    --warn-bg: #FEF2F2; --warn-border: #FCA5A5; --warn-text: #7F1D1D;
+    --focus: #161616; --radius: 4px;
+    --serif: "Karmina", Georgia, serif;
+    --sans: "Karmina", Georgia, serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page: #141413; --panel: #1C1B19; --soft: #242320; --brand: #FAF9F6; --brand-text: #141413;
+      --band: #0D0D0C; --band-text: #FAF9F6; --band-muted: #A8A49B; --heading: #FAF9F6; --body: #C2BEB5;
+      --border: #3A3833; --subtle: #2C2B27; --warn-bg: #2A1A17; --warn-border: #7A2E26; --warn-text: #F3CFC6; --focus: #FAF9F6;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #141413; --panel: #1C1B19; --soft: #242320; --brand: #FAF9F6; --brand-text: #141413;
+    --band: #0D0D0C; --band-text: #FAF9F6; --band-muted: #A8A49B; --heading: #FAF9F6; --body: #C2BEB5;
+    --border: #3A3833; --subtle: #2C2B27; --warn-bg: #2A1A17; --warn-border: #7A2E26; --warn-text: #F3CFC6; --focus: #FAF9F6;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--page); color: var(--body); font: 16px/1.55 var(--sans); }
+  strong, b { color: var(--heading); font-weight: 600; }
+  a { color: var(--heading); }
+  .band { background: var(--band); color: var(--band-text); }
+  .band-inner { max-width: 900px; margin: 0 auto; padding: 40px 16px 32px; position: relative; }
+  header.band .band-inner { padding-top: 64px; }
+  .band h1 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.02em; font-size: clamp(1.9rem, 6vw, 2.6rem); line-height: 1.08; margin: 0 0 10px; color: var(--band-text); }
+  .band .by { margin: 0; color: var(--band-muted); }
+  .back { position: absolute; top: 18px; left: 16px; color: var(--band-muted); font-size: 14px; }
+  .theme-toggle { position: absolute; top: 12px; right: 16px; min-height: 40px; padding: 6px 12px; font-family: var(--mono); font-size: 12px; font-weight: 500;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--band-text); background: transparent; border: 1px solid var(--band-muted); border-radius: var(--radius); cursor: pointer; }
+  footer.band .band-inner { padding: 28px 16px 36px; font-size: 13px; }
+  footer.band p { margin: 0 0 8px; color: var(--band-muted); }
+  footer.band a { color: inherit; text-underline-offset: 2px; }
+  footer.band .credit { margin-top: 14px; font-size: 14px; }
+  footer.band .sprite-credit { font-size: 12px; opacity: .8; }
+  .pixel-heart { vertical-align: -2px; margin: 0 2px; }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 40px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  h2 { font-family: var(--serif); font-weight: 500; font-size: 1.5rem; color: var(--heading); margin: 0 0 10px; letter-spacing: -0.01em; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  label { display: block; font-weight: 600; color: var(--heading); margin-bottom: 6px; font-size: 15px; }
+  input[type=password] { font: inherit; font-size: 16px; color: var(--heading); background: var(--soft);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; min-height: 48px; width: 100%; }
+  input:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .hint { font-size: 14px; margin: 6px 0 0; }
+  .btn { font: inherit; font-weight: 600; font-size: 15px; border-radius: var(--radius); padding: 10px 18px; min-height: 48px; border: 1px solid var(--brand);
+    background: var(--brand); color: var(--brand-text); cursor: pointer; }
+  .btn.secondary { background: var(--panel); color: var(--heading); border-color: var(--border); }
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; }
+  .pin-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pin-row input { width: 7.5em; font-family: var(--mono); font-size: 22px; letter-spacing: .3em; }
+  .pin-msg { margin: 8px 0 0; min-height: 1.2em; color: var(--warn-text); font-weight: 600; }
+  .src { font-size: 13px; margin-top: 14px; }
+  [hidden] { display: none !important; }
+
+  /* levels */
+  ol.levels { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  ol.levels li { display: grid; grid-template-columns: 84px 1fr; gap: 12px; align-items: baseline; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--soft); }
+  ol.levels .n { font-family: var(--mono); font-size: 13px; letter-spacing: .04em; color: var(--body); }
+  ol.levels .t { color: var(--heading); font-size: 17px; }
+  ol.levels .t small { display: block; color: var(--body); font-size: 14px; margin-top: 2px; }
+  ol.levels li.added { border-style: dashed; }
+
+  /* random picker */
+  .pick { margin: 14px 0 0; padding: 18px; border: 1px solid var(--brand); border-radius: var(--radius); background: var(--panel); min-height: 92px; }
+  .pick .line { font-family: var(--serif); font-size: 1.45rem; line-height: 1.3; color: var(--heading); margin: 0; }
+  .pick .from { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; margin: 8px 0 0; }
+  .pick .empty { margin: 0; }
+  .guide { color: var(--body); }
+
+  /* lists */
+  details.list { border-top: 1px solid var(--border); padding: 12px 0; }
+  details.list:first-of-type { border-top: 0; }
+  details.list > summary { cursor: pointer; font-weight: 600; color: var(--heading); font-size: 17px; }
+  details.list ol { margin: 10px 0 0; padding-left: 1.6em; }
+  details.list li { margin: 6px 0; color: var(--heading); }
+  ol.self { margin: 0; padding-left: 1.4em; }
+  ol.self li { margin: 8px 0; color: var(--heading); }
+
+  @media print {
+    :root, :root[data-theme="dark"], :root[data-theme="light"], :root:not([data-theme="light"]) {
+      --page:#FFF; --panel:#FFF; --soft:#FFF; --subtle:#EEE; --heading:#000; --body:#222; --border:#999; --band:#FFF; --band-text:#000; --band-muted:#333;
+      --brand:#000; --brand-text:#FFF; --warn-bg:#FFF; --warn-border:#999; --warn-text:#000;
+    }
+    .theme-toggle, .back, #pin-form, .noprint { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="band-inner">
+    <a class="back" href="./">← Pediatric Tools</a>
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch between light and dark mode"></button>
+    <h1>Validation</h1>
+    <p class="by">By Dr. Christian Rada, DO · Clinician reference</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- PIN gate (same PIN and unlock as the hub). Not real security: the page is public. -->
+  <form class="card" id="pin-form" autocomplete="off">
+    <label for="pin">Enter the clinician PIN</label>
+    <div class="pin-row">
+      <input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" aria-describedby="pin-msg">
+      <button class="btn" type="submit">Unlock</button>
+    </div>
+    <p class="pin-msg" id="pin-msg" role="alert"></p>
+  </form>
+
+  <div id="tool" data-pin-gated hidden>
+    <section class="card" aria-labelledby="levels-h">
+      <h2 id="levels-h">Levels of validation</h2>
+      <ol class="levels" id="levels"></ol>
+    </section>
+
+    <section class="card" aria-labelledby="pick-h">
+      <h2 id="pick-h">Give me one</h2>
+      <div class="btns noprint">
+        <button type="button" class="btn" data-pick="statements">Validation statement</button>
+        <button type="button" class="btn" data-pick="questions">Probing question</button>
+        <button type="button" class="btn secondary" data-pick="both">Either</button>
+      </div>
+      <div class="pick" aria-live="polite">
+        <p class="empty hint" id="pick-empty">Tap a button for a random line from the lists below.</p>
+        <p class="line" id="pick-line" hidden></p>
+        <p class="from" id="pick-from" hidden></p>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="lists-h">
+      <h2 id="lists-h">Statements and questions</h2>
+      <details class="list">
+        <summary>Validation statements (<span id="n-statements"></span>)</summary>
+        <ol id="list-statements"></ol>
+      </details>
+      <details class="list">
+        <summary>Probing / curious questions (<span id="n-questions"></span>)</summary>
+        <ol id="list-questions"></ol>
+      </details>
+    </section>
+
+    <section class="card" aria-labelledby="self-h">
+      <h2 id="self-h">Validating yourself</h2>
+      <p style="margin:0 0 8px">How can I validate myself?</p>
+      <ol class="self" id="self"></ol>
+    </section>
+
+    <div style="margin-top:8px"><button type="button" class="btn secondary" id="lock-btn">Lock clinician section</button></div>
+  </div>
+</main>
+
+<footer class="band">
+  <div class="band-inner">
+    <p>Levels of validation, validation statements and probing/curious questions: reproduced word for word, at Dr. Rada's direction, from training handouts whose source wasn't recorded. Level 7 is Dr. Rada's addition. "Validating yourself" is reproduced from a handout titled "Walking the Middle Path Handout 10: How Can We Validate Ourselves?"</p>
+    <p class="credit">Made with
+      <svg class="pixel-heart" viewBox="0 0 7 6" width="14" height="12" role="img" aria-label="love" shape-rendering="crispEdges">
+        <path fill="#E5484D" d="M1 0h2v1h-2zM4 0h2v1h-2zM0 1h7v2h-7zM1 3h5v1h-5zM2 4h3v1h-3zM3 5h1v1h-1z"/>
+      </svg>
+      <a href="https://claude.com/claude-code">Claude</a></p>
+    <p class="sprite-credit"><a href="credits.html">Credits</a><span class="gh-link" hidden> · <a href="https://github.com/Hyponatremia-Peds/hyponatremia-peds.github.io">Source code on GitHub</a></span></p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* ======================================================================
+   VALIDATION — all text below is transcribed word for word from the owner's
+   photographed handouts (2026-10-12), at the owner's direction (an approved
+   exception to the "own words" rule; see HANDOFF section 4). Nothing was added
+   from memory. Level 7 is the owner's handwritten addition.
+   Lists keep the handouts' order, wording and punctuation, including the
+   questions list's repeated "What are you feeling?".
+   ====================================================================== */
+const LEVELS = [
+  ["Level 1", "Listen with complete awareness (be awake)"],
+  ["Level 2", "Accurately reflect"],
+  ["Level 3", "Articulate unverbalized emotions, thoughts or behavioral patterns"],
+  ["Level 4", "Communicate how behavior makes sense in terms of past circumstances"],
+  ["Level 5", "Communicate how behavior makes sense in current circumstances"],
+  ["Level 6", "Be radically genuine"],
+  ["Level 7", "Functional validation"]
+];
+
+const STATEMENTS = [
+  "Wow, (that/she/he) must have made you feel really angry.",
+  "That’s messed up! (or stronger language if you are so inclined)",
+  "That’s really got to be frustrating!",
+  "Yeah, I can see how that might make you feel really sad/ angry/ frustrated/ rejected.",
+  "It makes sense you would be so upset about that.",
+  "It must make you feel horrible to have someone do that.",
+  "What a horrible feeling/situation that must be.",
+  "It sounds like you feel that’s really unfair and you shouldn’t be asked to do that.",
+  "That must be really discouraging.",
+  "Gosh, I know how much that meant to you.",
+  "Tell me more. (shows interest)",
+  "Anything I can do to help? (Shows caring and allows them to find their own answers)",
+  "What do you think should be done? (Shows interest, curiosity and empowers them to solve their own problems)",
+  "I can see that you are very (upset, sad, frightened, scared)",
+  "I would be (upset, sad, frightened, scared) too!!",
+  "I feel/ felt that way too. (Me too! Shows your own vulnerability)",
+  "Help me to understand… tell me more.",
+  "What am I not getting?",
+  "Would you like my opinion or do you just want me to listen?",
+  "Do you want to know what I think?",
+  "Does this make sense?",
+  "Fair enough.",
+  "I can see you’re overwhelmed. Let me help you with that. Can we talk?",
+  "I know you’re scared. It’s going to be hard…and I know you will figure it out.",
+  "How can I help you out of this pain?",
+  "Can you give me a stress #…1, I’m ok…10, I’m drowning!",
+  "What are you feeling?",
+  "I will worry if you don’t …(keep in contact….call me when you leave, etc)",
+  "What exactly happened? (shows interest and curiosity)",
+  "That must have been very upsetting for you.",
+  "You are my hero!!",
+  "When you’re sad, I feel sad too (because I love you)",
+  "I need time to think about it. (When you need time to think and respond)",
+  "I need to talk it over with (mom/dad) and we’ll get back to you.",
+  "Is this a good time to talk?",
+  "I guess that must have been hard for you.",
+  "I’m thinking this must have been (upsetting, sad, frightening, scary) for you",
+  "I would have responded that way too!",
+  "I can see this is very important to you and in this case I don’t share the same beliefs as you."
+];
+
+const QUESTIONS = [
+  "Can I ask some questions?",
+  "Is this a good time to talk?",
+  "Can we talk?",
+  "Tell me more.",
+  "What are you feeling?",
+  "I don’t understand.",
+  "Help me to understand.",
+  "What exactly happened? (Ask fact checking questions…)",
+  "What am I not getting?",
+  "Are you mad at…upset with…me?",
+  "What are you feeling?",
+  "How can I help you out of this pain?",
+  "Is there anything I can do to help you?",
+  "Can you give me a stress #? 1 = I’m OK, 10 = I’m drowning!!",
+  "Are you safe?",
+  "I will worry if you…(don’t keep in contact, don’t call when you leave the house, go there alone..)",
+  "I’m worried where this will go.",
+  "I’m thinking I might have a feeling of what you’re going through.",
+  "Would you like my opinion or do you just want me to listen?",
+  "Let me help you…",
+  "Can I help you with that?",
+  "Do you want to know what I think?",
+  "Does this make sense?",
+  "I need time to think about it…this. (Buy more time)",
+  "I need to talk to (mom, dad, etc.) about this. (Buy more time)",
+  "I / we will get back to you. (Buy more time)"
+];
+
+// "Walking the Middle Path Handout 10: How Can We Validate Ourselves?" (title as printed)
+const SELF = [
+  "Actively listen and pay attention to yourself: Be mindful of your thoughts, feelings, and behaviors.",
+  "Describe your feelings without passing judgment: “Wow, I’m really angry right now!” or “It makes sense that I’m a little nervous.”",
+  "Respond in a way that shows that you take yourself seriously: Accept that it is OK to have your emotion(s) (e.g., “It’s OK to feel sad sometimes”).",
+  "Acknowledge that the emotion may make sense in the situation. Show tolerance for yourself and your emotions (e.g., “It makes sense that I’m not able to focus very well with all of the stress I am under”).",
+  "Do not judge your own emotion (or yourself).",
+  "Use interpersonal effectiveness skills for self-respect to be fair to yourself, not apologize for feeling how you feel, stick up for yourself, and stay true to your values (FAST)."
+];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// Show a trailing "(…)" that explains the line (e.g. "(shows interest)") in a quieter color; the text itself is unchanged.
+const styled = s => esc(s).replace(/(\s)(\((?:shows|Shows|Me too|When you need|Ask fact|Buy more|or stronger|because)[^)]*\))\s*$/, '$1<span class="guide">$2</span>');
+
+$("levels").innerHTML = LEVELS.map(([n, t, sub], i) =>
+  `<li${i === 6 ? ' class="added"' : ""}><span class="n">${esc(n)}</span><span class="t">${esc(t)}${sub ? `<small>${esc(sub)}</small>` : ""}</span></li>`).join("");
+$("list-statements").innerHTML = STATEMENTS.map(s => `<li>${styled(s)}</li>`).join("");
+$("list-questions").innerHTML = QUESTIONS.map(s => `<li>${styled(s)}</li>`).join("");
+$("n-statements").textContent = STATEMENTS.length;
+$("n-questions").textContent = QUESTIONS.length;
+$("self").innerHTML = SELF.map(s => `<li>${esc(s)}</li>`).join("");
+
+/* Random picker: a shuffle bag per list, so every line comes up once before any repeats,
+   and the first line of a new round is never the line just shown. Exact duplicates are
+   drawn only once (the lists themselves stay as printed). */
+const POOLS = {
+  statements: [...new Set(STATEMENTS)].map(t => ({ t, from: "Validation statement" })),
+  questions: [...new Set(QUESTIONS)].map(t => ({ t, from: "Probing question" })),
+};
+POOLS.both = [...POOLS.statements, ...POOLS.questions.filter(q => !POOLS.statements.some(s => s.t === q.t))];
+const bags = {};
+let last = null;
+function draw(kind) {
+  if (!bags[kind] || !bags[kind].length) {
+    const b = POOLS[kind].slice();
+    for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
+    if (last && b.length > 1 && b[b.length - 1].t === last.t) [b[0], b[b.length - 1]] = [b[b.length - 1], b[0]];
+    bags[kind] = b;
+  }
+  return bags[kind].pop();
+}
+document.querySelectorAll("[data-pick]").forEach(btn => btn.addEventListener("click", () => {
+  last = draw(btn.dataset.pick);
+  $("pick-empty").hidden = true;
+  $("pick-line").hidden = false; $("pick-line").innerHTML = styled(last.t);
+  $("pick-from").hidden = false; $("pick-from").textContent = last.from;
+}));
+</script>
+<script>window.PedsShared && PedsShared.init();</script>
+</body>
+</html>

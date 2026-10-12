@@ -1,0 +1,8 @@
+/* Karmina (TypeTogether), the site's text face. Only Regular and Bold Italic are on hand,
+   and the owner wants no browser-faked bold anywhere (2026-10-12): bold text shows Regular.
+   <strong>/<b> still stand out by colour (each page sets them to --heading). */
+@font-face { font-family: "Karmina"; font-weight: 400; font-style: normal; font-display: swap;
+  src: url("Karmina-Regular.otf") format("opentype"); }
+@font-face { font-family: "Karmina"; font-weight: 700; font-style: italic; font-display: swap;
+  src: url("Karmina-BoldItalic.otf") format("opentype"); }
+html, html * { font-synthesis: none !important; }
